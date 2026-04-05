@@ -76,25 +76,18 @@ margin-top:15px;
 
 #bookingPage{display:none}
 
-/* ===== SEAT SCROLL FIX ===== */
+/* SEATS */
 
 .seat-scroll{
 width:100%;
 overflow-x:auto;
-overflow-y:hidden;
--webkit-overflow-scrolling:touch;
 }
-
-.seat-scroll::-webkit-scrollbar{
-display:none;
-}
+.seat-scroll::-webkit-scrollbar{display:none;}
 
 .seat-wrapper{
 min-width:1000px;
 margin:auto;
 }
-
-/* SEATS */
 
 .row{
 display:flex;
@@ -126,14 +119,13 @@ cursor:not-allowed;
 }
 
 /* MAP */
-
 .mapbox{
 margin-top:20px;
 border-radius:12px;
 overflow:hidden;
 }
 
-/* NEW CINEMA STYLE TICKET */
+/* TICKET */
 #ticketBox{
 display:none;
 background:#ffffff;
@@ -174,7 +166,6 @@ margin-top:10px;
 <body>
 
 <!-- SHOW PAGE -->
-
 <div id="showPage">
 
 <h1>🎶 खैरा भूधर चैता प्रोग्राम</h1>
@@ -210,10 +201,9 @@ margin-top:10px;
 
 
 <!-- BOOKING PAGE -->
-
 <div id="bookingPage">
 
-<div class="screen">🎬 STAGE  🎬</div>
+<div class="screen">🎬 STAGE 🎬</div>
 
 <h3 id="remain"></h3>
 
@@ -238,38 +228,30 @@ margin-top:10px;
 
 <button onclick="confirmBooking()">Confirm Booking</button>
 
-<br><br>
-
-<!-- ⭐ FINAL CINEMA STYLE TICKET ⭐ -->
+<!-- FULL ORIGINAL TICKET -->
 <div id="ticketBox">
 
-    <h2 style="margin:0;">खैरा भूधर रंग मंच – चैता</h2>
+<h2>खैरा भूधर रंग मंच – चैता</h2>
 
-    <p style="margin:4px 0;">📅 Date: 11 April 2026</p>
-    <p style="margin:4px 0;">⏱ Time: 08:15 PM</p>
+<p>📅 Date: 11 April 2026</p>
+<p>⏱ Time: 08:15 PM</p>
 
-    <div class="line"></div>
+<div class="line"></div>
 
-    <p>👤 नाम: <b id="tName">—</b></p>
-    <p>🪑 सीट नम्बर: <b id="tSeat">—</b></p>
-    <p>📅 बुकिंग समय: <b id="tBookingTime">—</b></p>
+<p>👤 नाम: <b id="tName"></b></p>
+<p>🪑 सीट नम्बर: <b id="tSeat"></b></p>
+<p>📅 बुकिंग समय: <b id="tBookingTime"></b></p>
 
-    <center>
-        <img id="tImg" class="photo">
-        <br>
-        <img id="tQR" class="qr" crossorigin="anonymous">
-    </center>
+<center>
+<img id="tImg" class="photo"><br>
+<img id="tQR" class="qr">
+</center>
 
-    <div class="line"></div>
+<div class="line"></div>
 
-    <p>📍 स्थान: Maa Kali Mandir, Khaira Bhudhar Pokhara</p>
+<p>📍 स्थान: Maa Kali Mandir, Khaira Bhudhar Pokhara</p>
 
-    <h3 style="margin-top:10px;">JDG Fast Internet, Khaira Bhudhar</h3>
-
-    <button onclick="downloadTicket()" 
-    style="padding:10px 20px;background:#198754;border:none;color:#fff;border-radius:8px;margin-top:15px;">
-    ⬇ Download Ticket
-    </button>
+<button onclick="downloadTicket()">⬇ Download Ticket</button>
 
 </div>
 
@@ -290,14 +272,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, set, get, onValue }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig={
+const app=initializeApp({
 apiKey:"AIzaSyCwjs-TbKnxcSbAMk8NNF-ATRh9sj1eYR4",
-authDomain:"skm-book-your-name.firebaseapp.com",
-databaseURL:"https://skm-book-your-name-default-rtdb.firebaseio.com",
-projectId:"skm-book-your-name"
-};
+databaseURL:"https://skm-book-your-name-default-rtdb.firebaseio.com"
+});
 
-const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 window.startBooking=()=>{
@@ -307,8 +286,6 @@ bookingPage.style.display="block";
 
 let selected=[];
 
-/* SEAT LAYOUT */
-
 const layout=[6,10,14,18,22,26,22,18,10,4];
 let seatNo=1;
 
@@ -316,7 +293,6 @@ layout.forEach((count,rowIndex)=>{
 
 let row=document.createElement("div");
 row.className="row";
-row.style.transform=`scale(${0.75 + rowIndex*0.03})`;
 
 for(let i=0;i<count;i++){
 
@@ -324,9 +300,6 @@ let id="A"+seatNo++;
 
 let seat=document.createElement("div");
 seat.className="seat";
-
-if(rowIndex<=1) seat.classList.add("vip");
-
 seat.innerText=id;
 seat.id="seat"+id;
 
@@ -357,7 +330,6 @@ row.appendChild(seat);
 hall.appendChild(row);
 });
 
-
 window.confirmBooking=async()=>{
 
 let name=nameInput.value;
@@ -379,30 +351,26 @@ if(snap.exists()) continue;
 
 await set(ref(db,'seats/'+seat),{
 name:name,
-img:reader.result
+img:reader.result,
+approved:false
 });
 }
 
-alert("Booking Done ✅");
+alert("Pending Approval");
 
-/* ⭐ Show Ticket ⭐ */
+document.getElementById("tName").innerText=name;
+document.getElementById("tSeat").innerText=selected.join(",");
+document.getElementById("tBookingTime").innerText=new Date().toLocaleString();
+document.getElementById("tImg").src=reader.result;
+
+document.getElementById("tQR").src=
+"https://api.qrserver.com/v1/create-qr-code/?size=170x170&data="+selected.join(",");
+
 ticketBox.style.display="block";
-
-document.getElementById("tName").innerText = name;
-document.getElementById("tSeat").innerText = selected.join(", ");
-document.getElementById("tBookingTime").innerText = new Date().toLocaleString();
-document.getElementById("tImg").src = reader.result;
-
-document.getElementById("tQR").setAttribute("crossorigin","anonymous");
-document.getElementById("tQR").src =
-    "https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=" + selected.join(",");
-
-ticketBox.scrollIntoView({behavior:"smooth"});
 };
 
 reader.readAsDataURL(file);
 };
-
 
 onValue(ref(db,'seats'),snap=>{
 
@@ -414,28 +382,28 @@ remain.innerText="Remaining Seats : "+(150-booked);
 for(let i in data){
 
 let s=document.getElementById("seat"+i);
+if(!s) continue;
 
-if(s){
-s.classList.add("booked");
-s.innerHTML=
-`<img src="${data[i].img}" 
-style="width:28px;height:28px;border-radius:6px;"><br>${data[i].name}`;
+if(data[i].approved === false){
+    s.style.background="red";
+    s.innerHTML="PENDING";
+}else{
+    s.classList.add("booked");
+    s.innerHTML=
+    `<img src="${data[i].img}" style="width:28px;height:28px;border-radius:6px;"><br>${data[i].name}`;
 }
+
 }
 
 });
 
-/* ⭐ Download Ticket ⭐ */
-
-window.downloadTicket = () => {
-    let ticket = document.getElementById("ticketBox");
-
-    html2canvas(ticket, { useCORS: true }).then(canvas => {
-        let link = document.createElement("a");
-        link.download = "Ticket.jpg";
-        link.href = canvas.toDataURL();
-        link.click();
-    });
+window.downloadTicket=()=>{
+html2canvas(ticketBox).then(canvas=>{
+let link=document.createElement("a");
+link.download="ticket.jpg";
+link.href=canvas.toDataURL();
+link.click();
+});
 };
 
 </script>
