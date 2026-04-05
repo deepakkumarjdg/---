@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>खैरा भूधर चैता प्रोग्राम</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#010617;
+color:#fff;
+text-align:center;
+}
+
+/* SCREEN */
+
+.screen{
+width:90%;
+margin:20px auto;
+padding:12px;
+background:linear-gradient(90deg,#fff,#aaa);
+color:#000;
+border-radius:60%/30%;
+font-weight:bold;
+box-shadow:0 0 25px #fff;
+}
+
+/* CAST SLIDER */
+
+.cast{
+display:flex;
+overflow-x:auto;
+gap:15px;
+padding:15px;
+scroll-behavior:smooth;
+}
+
+.cast::-webkit-scrollbar{display:none;}
+
+.cast-card{
+min-width:150px;
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+}
+
+.cast-card img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:12px;
+}
+
+.free{
+background:#22c55e;
+color:#000;
+padding:4px 10px;
+border-radius:6px;
+font-weight:bold;
+}
+
+button{
+padding:12px 25px;
+background:#e11d48;
+border:none;
+border-radius:8px;
+color:#fff;
+cursor:pointer;
+margin-top:15px;
+}
+
+#bookingPage{display:none}
+
+/* ===== SEAT SCROLL FIX ===== */
+
+.seat-scroll{
+width:100%;
+overflow-x:auto;
+overflow-y:hidden;
+-webkit-overflow-scrolling:touch;
+}
+
+.seat-scroll::-webkit-scrollbar{
+display:none;
+}
+
+.seat-wrapper{
+min-width:1000px;
+margin:auto;
+}
+
+/* SEATS */
+
+.row{
+display:flex;
+justify-content:center;
+}
+
+.seat{
+margin:3px;
+padding:7px;
+border-radius:6px;
+cursor:pointer;
+width:42px;
+font-size:10px;
+background:#22c55e;
+transition:.3s;
+}
+
+.vip{
+background:gold;
+color:#000;
+font-weight:bold;
+}
+
+.selected{background:orange;}
+
+.booked{
+background:#444;
+cursor:not-allowed;
+}
+
+/* MAP */
+
+.mapbox{
+margin-top:20px;
+border-radius:12px;
+overflow:hidden;
+}
+
+/* NEW CINEMA STYLE TICKET */
+#ticketBox{
+display:none;
+background:#ffffff;
+color:#000;
+padding:20px;
+border-radius:12px;
+margin:20px auto;
+width:380px;
+border:2px dashed #000;
+box-shadow:0 0 10px #999;
+}
+
+.line{
+width:100%;
+height:2px;
+background:#000;
+margin:10px 0;
+}
+
+.photo{
+width:90px;
+height:90px;
+border-radius:12px;
+object-fit:cover;
+border:1px solid #444;
+}
+
+.qr{
+width:170px;
+height:170px;
+border:1px solid #444;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SHOW PAGE -->
+
+<div id="showPage">
+
+<h1>🎶 खैरा भूधर चैता प्रोग्राम</h1>
+<h3>📅 11 April 2026<br>🕗 08:15 PM</h3>
+
+<div class="cast">
+
+<div class="cast-card">
+<img src="https://todaynewsnownews.wordpress.com/wp-content/uploads/2026/04/fb_img_17753553644604279739661616235255.jpg">
+<h4>नितेश सिंह</h4><p>अध्यक्ष</p>
+</div>
+
+<div class="cast-card">
+<img src="https://todaynewsnownews.wordpress.com/wp-content/uploads/2026/04/fb_img_17753554743766623763791568574197.jpg">
+<h4>मुन्ना कुमार</h4><p>प्रस्तावक</p>
+</div>
+
+<div class="cast-card">
+<img src="https://todaynewsnownews.wordpress.com/wp-content/uploads/2026/04/wp-17753604730453237493968726042327.jpg">
+<h4>मुन्ना माइकल</h4><p>कोषाध्यक्ष</p>
+</div>
+
+<div class="cast-card">
+<img src="https://todaynewsnownews.wordpress.com/wp-content/uploads/2026/04/img-20260405-wa00025924072055861619216.jpg">
+<h4>महेश जी</h4><p>सचिव</p>
+</div>
+
+</div>
+
+<button onclick="startBooking()">Book Your Chair <span class="free">FREE</span></button>
+
+</div>
+
+
+<!-- BOOKING PAGE -->
+
+<div id="bookingPage">
+
+<div class="screen">🎬 STAGE / SCREEN 🎬</div>
+
+<h3 id="remain"></h3>
+
+<select id="seatCount">
+<option value="1">1 Seat</option>
+<option value="2">2 Seats</option>
+<option value="3">3 Seats</option>
+</select>
+
+<br><br>
+
+<h3>कुर्सी बुकिंग के लिए - यहाँ अपना फ़ोटो और नाम डालो</h3>
+
+<input id="nameInput" placeholder="Enter Name"><br><br>
+<input type="file" id="photo"><br><br>
+
+<div class="seat-scroll">
+<div class="seat-wrapper">
+<div id="hall"></div>
+</div>
+</div>
+
+<button onclick="confirmBooking()">Confirm Booking</button>
+
+<br><br>
+
+<!-- ⭐ FINAL CINEMA STYLE TICKET ⭐ -->
+<div id="ticketBox">
+
+    <h2 style="margin:0;">खैरा भूधर रंग मंच – चैता</h2>
+
+    <p style="margin:4px 0;">📅 Date: 11 April 2026</p>
+    <p style="margin:4px 0;">⏱ Time: 08:15 PM</p>
+
+    <div class="line"></div>
+
+    <p>👤 नाम: <b id="tName">—</b></p>
+    <p>🪑 सीट नम्बर: <b id="tSeat">—</b></p>
+    <p>📅 बुकिंग समय: <b id="tBookingTime">—</b></p>
+
+    <center>
+        <img id="tImg" class="photo">
+        <br>
+        <img id="tQR" class="qr" crossorigin="anonymous">
+    </center>
+
+    <div class="line"></div>
+
+    <p>📍 स्थान: Maa Kali Mandir, Khaira Bhudhar Pokhara</p>
+
+    <h3 style="margin-top:10px;">JDG Fast Internet, Khaira Bhudhar</h3>
+
+    <button onclick="downloadTicket()" 
+    style="padding:10px 20px;background:#198754;border:none;color:#fff;border-radius:8px;margin-top:15px;">
+    ⬇ Download Ticket
+    </button>
+
+</div>
+
+<h3>📍 कार्यक्रम स्थान</h3>
+
+<div class="mapbox">
+<iframe width="100%" height="300"
+src="https://maps.google.com/maps?q=Maa%20Kali%20Mandir%20Khaira%20Bhudhar&z=15&output=embed">
+</iframe>
+</div>
+
+</div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, get, onValue }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyCwjs-TbKnxcSbAMk8NNF-ATRh9sj1eYR4",
+authDomain:"skm-book-your-name.firebaseapp.com",
+databaseURL:"https://skm-book-your-name-default-rtdb.firebaseio.com",
+projectId:"skm-book-your-name"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+window.startBooking=()=>{
+showPage.style.display="none";
+bookingPage.style.display="block";
+};
+
+let selected=[];
+
+/* SEAT LAYOUT */
+
+const layout=[6,10,14,18,22,26,22,18,10,4];
+let seatNo=1;
+
+layout.forEach((count,rowIndex)=>{
+
+let row=document.createElement("div");
+row.className="row";
+row.style.transform=`scale(${0.75 + rowIndex*0.03})`;
+
+for(let i=0;i<count;i++){
+
+let id="A"+seatNo++;
+
+let seat=document.createElement("div");
+seat.className="seat";
+
+if(rowIndex<=1) seat.classList.add("vip");
+
+seat.innerText=id;
+seat.id="seat"+id;
+
+seat.onclick=()=>{
+
+if(seat.classList.contains("booked"))return;
+
+let max=parseInt(seatCount.value);
+
+if(selected.includes(id)){
+selected=selected.filter(x=>x!==id);
+seat.classList.remove("selected");
+return;
+}
+
+if(selected.length>=max){
+alert("Max seat selected");
+return;
+}
+
+selected.push(id);
+seat.classList.add("selected");
+};
+
+row.appendChild(seat);
+}
+
+hall.appendChild(row);
+});
+
+
+window.confirmBooking=async()=>{
+
+let name=nameInput.value;
+let file=photo.files[0];
+
+if(!name||!file||selected.length==0){
+alert("Details fill करो");
+return;
+}
+
+let reader=new FileReader();
+
+reader.onload=async()=>{
+
+for(let seat of selected){
+
+let snap=await get(ref(db,'seats/'+seat));
+if(snap.exists()) continue;
+
+await set(ref(db,'seats/'+seat),{
+name:name,
+img:reader.result
+});
+}
+
+alert("Booking Done ✅");
+
+/* ⭐ Show Ticket ⭐ */
+ticketBox.style.display="block";
+
+document.getElementById("tName").innerText = name;
+document.getElementById("tSeat").innerText = selected.join(", ");
+document.getElementById("tBookingTime").innerText = new Date().toLocaleString();
+document.getElementById("tImg").src = reader.result;
+
+document.getElementById("tQR").setAttribute("crossorigin","anonymous");
+document.getElementById("tQR").src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=" + selected.join(",");
+
+ticketBox.scrollIntoView({behavior:"smooth"});
+};
+
+reader.readAsDataURL(file);
+};
+
+
+onValue(ref(db,'seats'),snap=>{
+
+let data=snap.val()||{};
+let booked=Object.keys(data).length;
+
+remain.innerText="Remaining Seats : "+(150-booked);
+
+for(let i in data){
+
+let s=document.getElementById("seat"+i);
+
+if(s){
+s.classList.add("booked");
+s.innerHTML=
+`<img src="${data[i].img}" 
+style="width:28px;height:28px;border-radius:6px;"><br>${data[i].name}`;
+}
+}
+
+});
+
+/* ⭐ Download Ticket ⭐ */
+
+window.downloadTicket = () => {
+    let ticket = document.getElementById("ticketBox");
+
+    html2canvas(ticket, { useCORS: true }).then(canvas => {
+        let link = document.createElement("a");
+        link.download = "Ticket.jpg";
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+};
+
+</script>
+
+</body>
+</html>
